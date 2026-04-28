@@ -1,0 +1,192 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+/* ─── Design Tokens ─────────────────────────────────────────────── */
+:root {
+  --bg-primary:    #07070f;
+  --bg-secondary:  #0e0e18;
+  --bg-tertiary:   #14141f;
+  --bg-card:       #111119;
+  --bg-card-hover: #18182a;
+  --bg-input:      #13131d;
+  --bg-glass:      rgba(255,255,255,0.035);
+
+  --border:        rgba(255,255,255,0.07);
+  --border-hover:  rgba(255,255,255,0.13);
+  --border-accent: rgba(99,102,241,0.35);
+
+  --text-primary:  #eeeef8;
+  --text-secondary:#9090b0;
+  --text-muted:    #4a4a6a;
+  --text-accent:   #818cf8;
+
+  --accent:        #6366f1;
+  --accent-hover:  #5255e0;
+  --accent-glow:   rgba(99,102,241,0.28);
+  --accent-subtle: rgba(99,102,241,0.10);
+
+  --success:       #10b981;
+  --warning:       #f59e0b;
+  --danger:        #ef4444;
+}
+
+.light {
+  --bg-primary:    #f5f5fc;
+  --bg-secondary:  #ffffff;
+  --bg-tertiary:   #ebebf7;
+  --bg-card:       #ffffff;
+  --bg-card-hover: #f0f0fc;
+  --bg-input:      #ebebf7;
+  --bg-glass:      rgba(0,0,0,0.02);
+
+  --border:        rgba(0,0,0,0.07);
+  --border-hover:  rgba(0,0,0,0.13);
+  --border-accent: rgba(99,102,241,0.30);
+
+  --text-primary:  #0a0a18;
+  --text-secondary:#55557a;
+  --text-muted:    #9999be;
+  --text-accent:   #5558e0;
+
+  --accent:        #5558e0;
+  --accent-hover:  #4446cc;
+  --accent-glow:   rgba(99,102,241,0.18);
+  --accent-subtle: rgba(99,102,241,0.08);
+
+  --success:       #059669;
+  --warning:       #d97706;
+  --danger:        #dc2626;
+}
+
+/* ─── Reset & Base ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;           /* explicit base so rem is predictable */
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+/* ─── Custom Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ─── Utilities ──────────────────────────────────────────────────── */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+}
+
+.glow-accent {
+  box-shadow: 0 0 30px var(--accent-glow), 0 0 80px rgba(99,102,241,0.05);
+}
+
+/* ─── Text gradients ─────────────────────────────────────────────── */
+.text-gradient {
+  background: linear-gradient(135deg, #818cf8, #c4b5fd, #e879f9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-blue {
+  background: linear-gradient(135deg, #60a5fa, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Animated background ─────────────────────────────────────────── */
+.animated-gradient {
+  background: linear-gradient(-45deg, #07070f, #10102a, #09152a, #07070f);
+  background-size: 400% 400%;
+  animation: gradient-shift 18s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── Pulse glow ─────────────────────────────────────────────────── */
+@keyframes pulse-glow {
+  0%,100% { box-shadow: 0 0 20px var(--accent-glow); }
+  50%     { box-shadow: 0 0 50px var(--accent-glow), 0 0 100px rgba(99,102,241,0.12); }
+}
+.pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
+
+/* ─── Cursor blink for streaming ─────────────────────────────────── */
+@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+
+.cursor-blink::after {
+  content: '▋';
+  animation: blink 1s step-end infinite;
+  color: var(--accent);
+}
+
+/* ─── Card hover lift ─────────────────────────────────────────────── */
+.card-hover {
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-hover);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+}
+
+/* ─── Input focus ring ───────────────────────────────────────────── */
+.input-ring:focus-within {
+  box-shadow: 0 0 0 2px var(--accent-glow);
+  border-color: var(--border-accent);
+}
+
+/* ─── Floating orbs ──────────────────────────────────────────────── */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+}
+
+/* ─── Badge ──────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ─── Prose / Markdown ───────────────────────────────────────────── */
+.prose-medical h1,
+.prose-medical h2,
+.prose-medical h3 {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-top: 1.3em;
+  margin-bottom: 0.5em;
+}
+.prose-medical h2 { font-size: 1.05em; color: var(--text-accent); }
+.prose-medical p  { color: var(--text-secondary); line-height: 1.75; margin-bottom: 0.8em; }
+.prose-medical ul,
+.prose-medical ol { color: var(--text-secondary); padding-left: 1.5em; margin-bottom: 0.8em; }
+.prose-medical li { margin-bottom: 0.3em; line-height: 1.65; }
+.prose-medical strong { color: var(--text-primary); font-weight: 600; }
+.prose-medical em    { color: var(--text-accent); }
