@@ -235,7 +235,7 @@ export default function SettingsPage() {
                       >
                         <option value="" style={{ background: 'var(--bg-card)' }}>Server Default</option>
                         {displayModels.map((m) => (
-                          <option key={m} value={m.id} style={{ background: 'var(--bg-card)' }}>
+                          <option key={m.id} value={m.id} style={{ background: 'var(--bg-card)' }}>
                             {m.displayName}
                           </option>
                         ))}
