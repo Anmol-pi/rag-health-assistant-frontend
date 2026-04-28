@@ -5,40 +5,10 @@ import { AppShell } from '@/components/layout/AppShell';
 import { useAppStore } from '@/store/appStore';
 import { useQuery } from '@tanstack/react-query';
 import { checkHealth } from '@/lib/api';
-import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  Radar,
-  ResponsiveContainer,
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  Legend,
-} from 'recharts';
 import { cn } from '@/lib/utils';
 import { TrendingUp, Brain, Activity, Stethoscope } from 'lucide-react';
 
 const COLORS = ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#e879f9'];
-
-const CustomTooltipStyle = {
-  background: 'var(--bg-card)',
-  border: '1px solid var(--border)',
-  borderRadius: '12px',
-  color: 'var(--text-primary)',
-  fontSize: '12px',
-  padding: '8px 12px',
-};
 
 export default function AnalyticsPage() {
   const sessions = useAppStore((s) => s.sessions);
@@ -141,19 +111,14 @@ export default function AnalyticsPage() {
             <p className="font-semibold text-[var(--text-primary)] mb-1">Disease Frequency</p>
             <p className="text-xs text-[var(--text-muted)] mb-4">Top predicted diseases by occurrence</p>
             {topDiseaseData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={topDiseaseData} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="name" tick={{ fill: 'var(--text-muted)', fontSize: 9 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={CustomTooltipStyle} />
-                  <Bar dataKey="count" name="Occurrences" radius={[6, 6, 0, 0]}>
-                    {topDiseaseData.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <BarSummaryList
+                items={topDiseaseData.map((item, index) => ({
+                  label: item.name,
+                  value: item.count,
+                  detail: `${item.verifiedPct}% verified · ${item.avgProb}% avg probability`,
+                  color: COLORS[index % COLORS.length],
+                }))}
+              />
             ) : (
               <EmptyChart />
             )}
@@ -169,39 +134,25 @@ export default function AnalyticsPage() {
             <p className="font-semibold text-[var(--text-primary)] mb-1">RAG Verification Rate</p>
             <p className="text-xs text-[var(--text-muted)] mb-4">How many diagnoses had RAG-verified predictions</p>
             {sessions.length > 0 ? (
-              <div className="flex items-center gap-6">
-                <ResponsiveContainer width="60%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={verificationPieData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={55}
-                      outerRadius={85}
-                      paddingAngle={3}
-                      dataKey="value"
-                    >
-                      <Cell fill="#6366f1" />
-                      <Cell fill="#374151" />
-                    </Pie>
-                    <Tooltip contentStyle={CustomTooltipStyle} />
-                  </PieChart>
-                </ResponsiveContainer>
+              <div className="grid gap-5 sm:grid-cols-[180px_1fr] items-center">
+                <div
+                  className="mx-auto flex h-40 w-40 items-center justify-center rounded-full border border-[var(--border)]"
+                  style={{
+                    background: `conic-gradient(#6366f1 0 ${sessions.length ? Math.round((verifiedCount / sessions.length) * 100) : 0}%, #374151 ${sessions.length ? Math.round((verifiedCount / sessions.length) * 100) : 0}% 100%)`,
+                  }}
+                >
+                  <div className="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-[var(--bg-card)] text-center">
+                    <span className="text-2xl font-bold text-[var(--text-primary)]">
+                      {sessions.length ? Math.round((verifiedCount / sessions.length) * 100) : 0}%
+                    </span>
+                    <span className="text-[0.65rem] text-[var(--text-muted)] uppercase tracking-[0.2em]">Verified</span>
+                  </div>
+                </div>
+
                 <div className="space-y-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                      <span className="text-xs text-[var(--text-muted)]">RAG Verified</span>
-                    </div>
-                    <p className="text-xl font-bold text-[var(--text-primary)]">{verifiedCount}</p>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[var(--text-muted)]" />
-                      <span className="text-xs text-[var(--text-muted)]">Partial</span>
-                    </div>
-                    <p className="text-xl font-bold text-[var(--text-primary)]">{unverifiedCount}</p>
-                  </div>
+                  <MetricRow label="RAG Verified" value={verifiedCount} tone="indigo" />
+                  <MetricRow label="Partial Match" value={unverifiedCount} tone="slate" />
+                  <MetricRow label="Total Sessions" value={sessions.length} tone="emerald" />
                 </div>
               </div>
             ) : (
@@ -222,19 +173,14 @@ export default function AnalyticsPage() {
             <p className="font-semibold text-[var(--text-primary)] mb-1">Most Common Symptoms</p>
             <p className="text-xs text-[var(--text-muted)] mb-4">Symptoms you've reported most frequently</p>
             {topSymptomData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart
-                  data={topSymptomData}
-                  layout="vertical"
-                  margin={{ top: 0, right: 10, left: 10, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
-                  <XAxis type="number" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} width={80} />
-                  <Tooltip contentStyle={CustomTooltipStyle} />
-                  <Bar dataKey="count" name="Times reported" radius={[0, 6, 6, 0]} fill="#8b5cf6" />
-                </BarChart>
-              </ResponsiveContainer>
+              <BarSummaryList
+                items={topSymptomData.map((item, index) => ({
+                  label: item.name,
+                  value: item.count,
+                  detail: 'Times reported',
+                  color: COLORS[(index + 1) % COLORS.length],
+                }))}
+              />
             ) : (
               <EmptyChart />
             )}
@@ -250,23 +196,14 @@ export default function AnalyticsPage() {
             <p className="font-semibold text-[var(--text-primary)] mb-1">Monthly Trend</p>
             <p className="text-xs text-[var(--text-muted)] mb-4">Diagnosis sessions per month</p>
             {monthlyChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={240}>
-                <LineChart data={monthlyChartData} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="month" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={CustomTooltipStyle} />
-                  <Line
-                    type="monotone"
-                    dataKey="count"
-                    name="Sessions"
-                    stroke="#6366f1"
-                    strokeWidth={2.5}
-                    dot={{ fill: '#6366f1', r: 4, strokeWidth: 2, stroke: 'var(--bg-card)' }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <BarSummaryList
+                items={monthlyChartData.map((item, index) => ({
+                  label: item.month,
+                  value: item.count,
+                  detail: 'Sessions in month',
+                  color: COLORS[(index + 2) % COLORS.length],
+                }))}
+              />
             ) : (
               <EmptyChart />
             )}
@@ -308,6 +245,57 @@ function EmptyChart() {
     <div className="flex flex-col items-center justify-center h-[200px] text-[var(--text-muted)]">
       <Brain size={32} className="mb-3 opacity-20" />
       <p className="text-sm">No data yet — run diagnoses to see analytics</p>
+    </div>
+  );
+}
+
+function BarSummaryList({
+  items,
+}: {
+  items: Array<{
+    label: string;
+    value: number;
+    detail: string;
+    color: string;
+  }>;
+}) {
+  const maxValue = Math.max(...items.map((item) => item.value), 1);
+
+  return (
+    <div className="space-y-3">
+      {items.map((item) => {
+        const width = Math.max(6, Math.round((item.value / maxValue) * 100));
+
+        return (
+          <div key={item.label} className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3 text-xs">
+              <span className="font-medium text-[var(--text-primary)]">{item.label}</span>
+              <span className="text-[var(--text-muted)]">{item.value} · {item.detail}</span>
+            </div>
+            <div className="h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+              <div
+                className="h-full rounded-full"
+                style={{ width: `${width}%`, background: item.color }}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function MetricRow({ label, value, tone }: { label: string; value: number; tone: 'indigo' | 'slate' | 'emerald' }) {
+  const toneClasses = {
+    indigo: 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400',
+    slate: 'bg-slate-500/10 border-slate-500/20 text-slate-300',
+    emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+  } as const;
+
+  return (
+    <div className={cn('flex items-center justify-between gap-4 rounded-xl border px-4 py-3', toneClasses[tone])}>
+      <span className="text-xs font-medium">{label}</span>
+      <span className="text-sm font-semibold">{value}</span>
     </div>
   );
 }

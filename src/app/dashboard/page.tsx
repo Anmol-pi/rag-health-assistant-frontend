@@ -16,18 +16,6 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import Link from 'next/link';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  Cell,
-} from 'recharts';
 import { cn, formatDate } from '@/lib/utils';
 
 const activityData = [
@@ -41,16 +29,6 @@ const activityData = [
 ];
 
 const CHART_COLORS = ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#e879f9'];
-
-const tooltipStyle = {
-  background: 'var(--bg-card)',
-  border: '1px solid var(--border)',
-  borderRadius: '14px',
-  color: 'var(--text-primary)',
-  fontSize: '13px',
-  padding: '10px 14px',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-};
 
 export default function DashboardPage() {
   const sessions = useAppStore((s) => s.sessions);
@@ -171,45 +149,21 @@ export default function DashboardPage() {
                 <p className="text-sm text-[var(--text-muted)] mt-0.5">Diagnosis sessions over the past week</p>
               </div>
               <div className="flex items-center gap-5 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-indigo-500" />
-                  <span className="text-[var(--text-muted)]">Sessions</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-purple-400" />
-                  <span className="text-[var(--text-muted)]">Verified</span>
-                </div>
+                <LegendPill color="bg-indigo-500" label="Sessions" />
+                <LegendPill color="bg-purple-400" label="Verified" />
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={activityData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorS" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.35} />
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorV" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.35} />
-                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis
-                  dataKey="day"
-                  tick={{ fill: 'var(--text-muted)', fontSize: 13 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fill: 'var(--text-muted)', fontSize: 13 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip contentStyle={tooltipStyle} />
-                <Area type="monotone" dataKey="sessions" stroke="#6366f1" strokeWidth={2.5} fill="url(#colorS)" />
-                <Area type="monotone" dataKey="verified" stroke="#8b5cf6" strokeWidth={2.5} fill="url(#colorV)" />
-              </AreaChart>
-            </ResponsiveContainer>
+            <div className="space-y-3">
+              {activityData.map((item) => (
+                <div key={item.day} className="grid grid-cols-[44px_1fr] items-center gap-3">
+                  <span className="text-xs font-semibold text-[var(--text-muted)]">{item.day}</span>
+                  <div className="space-y-1">
+                    <MetricBar label="Sessions" value={item.sessions} max={8} color="#6366f1" />
+                    <MetricBar label="Verified" value={item.verified} max={8} color="#8b5cf6" />
+                  </div>
+                </div>
+              ))}
+            </div>
           </motion.div>
 
           {/* Bar chart — 1 col */}
@@ -223,30 +177,22 @@ export default function DashboardPage() {
             <p className="text-sm text-[var(--text-muted)] mb-5">Most frequent predictions</p>
 
             {topDiseases.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart
-                  data={topDiseases}
-                  layout="vertical"
-                  margin={{ top: 0, right: 10, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
-                  <XAxis type="number" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={90}
-                  />
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="count" radius={[0, 8, 8, 0]}>
-                    {topDiseases.map((_, i) => (
-                      <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="space-y-3">
+                {topDiseases.map((item, index) => (
+                  <div key={item.name} className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-3 text-xs">
+                      <span className="font-medium text-[var(--text-primary)]">{item.name}</span>
+                      <span className="text-[var(--text-muted)]">{item.count} occurrences</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${Math.max(8, Math.round((item.count / Math.max(topDiseases[0]?.count || 1, 1)) * 100))}%`, background: CHART_COLORS[index % CHART_COLORS.length] }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <EmptyState message="Run diagnoses to see disease insights" />
             )}
@@ -383,6 +329,39 @@ function EmptyState({ message }: { message: string }) {
     <div className="flex flex-col items-center justify-center h-[240px] text-[var(--text-muted)]">
       <TrendingUp size={36} className="mb-3 opacity-20" />
       <p className="text-sm text-center">{message}</p>
+    </div>
+  );
+}
+
+function MetricBar({
+  label,
+  value,
+  max,
+  color,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  color: string;
+}) {
+  const width = Math.max(8, Math.round((value / Math.max(max, 1)) * 100));
+
+  return (
+    <div className="grid grid-cols-[72px_1fr_32px] items-center gap-2 text-[11px]">
+      <span className="text-[var(--text-muted)]">{label}</span>
+      <div className="h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
+        <div className="h-full rounded-full" style={{ width: `${width}%`, background: color }} />
+      </div>
+      <span className="text-right font-semibold text-[var(--text-primary)]">{value}</span>
+    </div>
+  );
+}
+
+function LegendPill({ color, label }: { color: string; label: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-3 h-3 rounded-full ${color}`} />
+      <span className="text-[var(--text-muted)]">{label}</span>
     </div>
   );
 }
