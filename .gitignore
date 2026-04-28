@@ -22,8 +22,6 @@
 
 # misc
 .DS_Store
-/.vscode/
-/.idea/
 *.pem
 
 # debug
@@ -41,6 +39,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# temporary docs
-README.md

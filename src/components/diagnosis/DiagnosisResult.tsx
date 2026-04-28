@@ -7,7 +7,18 @@ import { useAppStore } from '@/store/appStore';
 import { DiseaseCard } from '@/components/ui/DiseaseCard';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { cn, scaleProbability } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  Radar,
+} from 'recharts';
 
 const COLORS = ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd'];
 
@@ -30,12 +41,12 @@ export function DiagnosisResult() {
 
   const pieData = predictionResult?.top_diseases.map((d) => ({
     name: d.disease_name,
-    value: Math.round(scaleProbability(d.probability) * 100),
+    value: Math.round(d.probability * 100),
   })) || [];
 
   const radarData = predictionResult?.top_diseases.map((d) => ({
     disease: d.disease_name.split(' ').slice(0, 2).join(' '),
-    confidence: Math.round(scaleProbability(d.probability) * 100),
+    confidence: Math.round(d.probability * 100),
     verification: d.rag_symptom_match ? 90 : 40,
     symptomMatch: Math.min(d.matched_symptoms.length * 20, 100),
   })) || [];
@@ -169,7 +180,7 @@ export function DiagnosisResult() {
 
         {/* Right column: charts */}
         <div className="space-y-4">
-          {/* Confidence summary */}
+          {/* Probability pie chart */}
           {pieData.length > 0 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -178,19 +189,40 @@ export function DiagnosisResult() {
               className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] p-5"
             >
               <p className="text-sm font-semibold text-[var(--text-primary)] mb-4">Confidence Distribution</p>
-              <div className="space-y-3">
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={85}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {pieData.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: 'var(--bg-card)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '12px',
+                      color: 'var(--text-primary)',
+                      fontSize: '12px',
+                    }}
+                    formatter={(val) => [`${val}%`, 'Confidence']}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              {/* Legend */}
+              <div className="space-y-2 mt-2">
                 {pieData.map((item, i) => (
-                  <div key={item.name} className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-3 text-xs">
-                      <span className="text-[var(--text-secondary)] truncate">{item.name}</span>
-                      <span className="text-[var(--text-primary)] font-semibold">{item.value}%</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{ width: `${Math.max(8, item.value)}%`, background: COLORS[i % COLORS.length] }}
-                      />
-                    </div>
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
+                    <span className="text-[var(--text-secondary)] truncate">{item.name}</span>
+                    <span className="ml-auto text-[var(--text-primary)] font-semibold">{item.value}%</span>
                   </div>
                 ))}
               </div>

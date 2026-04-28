@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { DiseasePrediction } from '@/lib/api';
-import { formatProbability, getRiskLevel, scaleProbability } from '@/lib/utils';
+import { formatProbability, getRiskLevel } from '@/lib/utils';
 import { CheckCircle2, AlertCircle, Target } from 'lucide-react';
 
 interface DiseaseCardProps {
@@ -14,8 +14,7 @@ interface DiseaseCardProps {
 
 export function DiseaseCard({ prediction, rank, delay = 0 }: DiseaseCardProps) {
   const risk = getRiskLevel(prediction.probability);
-  const scaledProb = scaleProbability(prediction.probability);
-  const probPercent = scaledProb * 100;
+  const probPercent = prediction.probability * 100;
 
   return (
     <motion.div
