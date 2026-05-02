@@ -7,7 +7,7 @@
 ## 🔗 Project Links
 
 * 🌐 **Live Application:**
-  👉 [https://rag-health-assistant-frontend.vercel.app/](https://rag-health-assistant-frontend.vercel.app/)
+  👉 [https://rag-medai.vercel.app/](https://rag-medai.vercel.app/)
 
 * 🧠 **Backend API (Live):**
   👉 [https://medai-backend-production-a830.up.railway.app](https://medai-backend-production-a830.up.railway.app)
