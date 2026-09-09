@@ -150,13 +150,6 @@ Contributions are welcome!
 ```bash
 fork → clone → create branch → commit → push → PR
 ```
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**
-
 ---
 
 ## ⭐ Support
